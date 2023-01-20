@@ -1,0 +1,41 @@
+---
+title: "Lab 1: Getting to Know Each Other"
+author: "Susan Davis"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions:
+
+The purpose of this lab assignment is to get to know a student in the class, communicate the information learned in writing, and check to see if R Markdown is properly knitting to HTML. Start by putting your full name in the space provided above in the R Markdown file (Replace FIRSTNAME and LASTNAME).
+
+In this first lab, you will interview another student in the class and record this information in the appropriate space below. Find 2 or 3 students nearby to interview. If you are in a group of 3, make sure you work in a circle where person 1 interviews person 2, person 2 interviews person 3, and person 3 interviews person 1. Don't just get the answers required, but actually get to know them..
+
+After you are done, knit the R Markdown file to HTML and submit it to Canvas under Lab 1.
+
+# Interview:
+
+- Name of Student: Maddie Peronto
+
+- Origin: Originally from Orlando Florida. Maddie lived in Charlotte the past ten years. Maddie likes Universal better then Disney. 
+
+- Year in School: Maddie is a Sophomore at UNC.
+
+- Major or Minor: Maddie is a Double Major in Statistics and Sports Administration. 
+
+- Involvement on Campus: Maddie is a softball team student manager, an executive team for Carolina sports Business club, and also a member of Pi Beta Phi.
+
+- Plans After Graduation: Maddie does not know if she want to go to graduate school or law school. Maybe she would want to work in sports law. 
+
+- Biggest Influence in Your Life: Maddies biggest influence in her life is her Family.
+
+- Favorite Thing to Do in Your Free Time: Maddie's favorite thing to do is nap or go to the gym. Maddie also works at burn boot camp which she enjoys. 
+
+- Positive Thing During the Pandemic: Maddie was able to spend senior year with friends because she did not have to physically go to school due to the pandemic. 
+
+- Negative Thing During the Pandemic: Maddie had covid on her birthday :(((
+

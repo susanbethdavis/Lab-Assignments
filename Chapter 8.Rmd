@@ -1,0 +1,17 @@
+---
+title: "Chapter 8"
+author: "Susan Davis"
+date: "2023-02-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+```
+
+```{r}
+
+```
+

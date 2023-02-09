@@ -1,0 +1,174 @@
+---
+title: "Lab 3: Advanced Data Transformation"
+author: "FIRSTNAME LASTNAME"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r , include=FALSE}
+# This is a good place to put libraries required for using the ggplot function
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
+library(tidyverse)    #Loads the tidyverse suite of packages
+library(nycflights13) #Contains Flight Data
+library(knitr)        #kable() for HTML Tables
+library(kableExtra)   #HTML Table Styling
+```
+
+# Introduction
+```{r}
+flights
+print(getwd())
+```
+
+The main purpose of this tutorial is to put together all 5 key functions from **[dplyr](https://dplyr.tidyverse.org/reference/index.html)** and use them to create summary tables and delightful graphs in RMarkdown. The functions and their purposes are listed as follows:
+
+- `filter()` *Selects Observations Based on Values*
+
+- `arrange()` *Sorts Observations Based on Criteria*
+
+- `select()` or `rename()` *Selects, Deselects, Renames, and Reorders Variables*
+
+- `mutate()` or `transmute()` *Creates New Variables Which Were Originally Nonexistant*
+
+- `summarize()` *Aggregates the Data Based on Helpful Summary Statistics*
+
+To further incite your anger towards the airline industry, we will continue to practice our skills using the dataset `flights` by loading the R package `nycflights13`. Until we learn how to fly, this dataset remains relevant.
+
+> I'll spread my wings, and learn how to fly. I'll do what it takes till I touch the sky.
+>
+> -- <cite>Kelly Clarkson</cite>
+
+# Part 1: Summarizing the Data (4 Points)
+
+Using the pipe `%>%` to chain functions from `dplyr`, modify the code below to create a dataset named `flight.summary` that contains the following ordered modfications:
+
+1. Starts with the raw dataset `flights` in the package `nycflights13`.
+Check
+2. Transform delay variables so that they are measured in minutes since midnight, and then create a metric to measure accuracy based on those transformed delay variables. Use the geometric distance like seen in lecture.
+check
+3. Remove missing observations.
+check
+4. Group data based on combinations of "origin", "dest", and "carrier".
+check
+5. Summarize the data using the number of observations, the accuracy mean, the accuracy variance, and the mean distance for each combination of "origin", "dest", and "carrier". 
+check
+6. Filters summarized data to remove all combinations of "origin", "dest", and "carrier" with less than or equal to 10 flights throughout 2013.
+check 
+7. Release the grouping constraint using the function `ungroup()`.
+check
+8. Create a variable called "proportion"" that represents the proportion of flights within each combination (with more than 10 flights).
+check
+
+
+
+```{r, eval=T}
+flight.summary = 
+  
+  #1
+  flights %>%
+          
+  #2
+  mutate(
+    dep_min       = (dep_time%/%100)*60+dep_time%%100,
+    sched_dep_min = (sched_dep_time%/%100)*60+sched_dep_time%%100,
+    arr_min       = (arr_time%/%100)*60+arr_time%%100,
+    sched_arr_min = (sched_arr_time%/%100)*60+sched_arr_time%%100,
+    dep_delay_min = dep_min-sched_dep_min,
+    arr_delay_min = arr_min-sched_arr_min,
+    accuracy      = abs(dep_delay_min) + abs(arr_delay_min)
+  ) %>%
+  
+  #3
+  filter(complete.cases(.)) %>%
+  
+  #4
+  group_by(origin,dest,carrier) %>%
+
+  #5
+  summarize(
+    count=n(),
+    mean.acc=mean(accuracy),
+    var.acc= sd(accuracy),
+    mean.dist= mean(distance)
+  ) %>%
+  
+  #6
+  filter(n() <= 10) %>%
+  
+  #7
+  ungroup() %>%
+  
+  #8
+  mutate(proportion= mean(n() >= 10))
+
+head(flight.summary) #DO NOT CHANGE THIS LINE OF CODE
+```
+
+
+# Part 2: Building Charts From Summary Data
+
+### 2.1 (1 Point)
+
+<center><img src="graph1.png"></center>
+
+The purpose of creating this plot was to investigate if flight accuracy gets worse or better for longer flights. The chart above displays the approximated linear relationship between flight accuracy and flight distance for each the 3 NYC airports. This first image was created using a combination of `geom_point()` and `geom_smooth()`. Recreate this image using `ggplot()` and remember to modify the defaults of `geom_smooth()` to get linear trend lines without standard error regions. 
+
+```{r,eval=T}
+ggplot(data=flight.summary) +
+  geom_point(mapping = aes(x = mean.dist, y = mean.acc, color = origin))+
+  geom_smooth(mapping = aes(x = mean.dist, y = mean.acc, color = origin),method = lm, se = FALSE)
+```
+
+### 2.2 (1 Point)
+
+The first thing we notice is that not many flights are over 3000 miles in distance. Design a new plot similar to the one above that ignores the scenarios where the distance exceeds 3000. This will prevent rare occurrences from effecting our linear trend comparison and present these relationships in a zoomed-in window where the majority of data exists.
+```{r,eval=T}
+ggplot(data=filter(flight.summary,mean.dist < 3000)) +
+  geom_point(mapping = aes(x = mean.dist, y = mean.acc, color = origin)) +
+  geom_smooth(mapping = aes(x = mean.dist, y = mean.acc, color = origin), method = lm, se = FALSE)
+```
+
+### 2.2 (1 Point)
+
+Answer the following question using complete sentences: 
+
+Each trend line is doing different things. Which of the three originating airports is doing the worst regarding the relationship between flight accuracy and flight distance? Explain why.
+
+LGA is doing the worst regarding the relationship between accuracy and flight distance, as seen by the most negative slope of the three lines. I think a potential reason for this is due to the fact that there is not data on distances greater then 1500 for mean distance. Maybe if we had more data, the mean average would be pulled up more. This lack of data is due to LGA not having as many international flights as the other two airports. Maybe domestic flights have more issues with delays then international flights. 
+
+
+# Part 3: Build a Nice Table to Be Displayed in RMarkdown (1 Point)
+
+The dataset we created, `flight.summary`, summarizes the raw data but still contains 370 observations. Below I have provided code, that produces a dataset called `flight.summary2` that only contains the top 5 and bottom 5 combinations of "origin", "dest", and "carrier" based on mean accuracy. Closely examine this code and ensure that you understand what is happening here. Set `eval=T` to create `flight.summary2`. 
+
+```{r,eval=T}
+flight.summary2 = 
+  flight.summary %>%
+  mutate(rank=min_rank(mean.acc)) %>%
+  filter(min_rank(mean.acc)<=5 | min_rank(desc(mean.acc))<=5) %>%
+  arrange(rank)
+```
+
+The `kable()` function in the `knitr` package allows for creating HTML tables. For information about the `kable` package, click **[here](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html)** Furthermore, the `kableExtra` package allows you to add beauty to those internet-ready tables. Click **[here](http://haozhu233.github.io/kableExtra/awesome_table_in_html.html)** for a helpful introduction. 
+
+Once you understand the function of `kable()` and the modifications you can apply, start an R code chunk to place the information required to produce an HTML table of `flight.summary2`.
+
+```{r}
+flight.summary2 %>%
+  kbl() %>%
+  kable_material(c("striped", "hover"))
+```
+
+
+
+# Part 4: Additional Questions (2 Points)
+
+In this class you will be forced to analyze data you probably care very little about. *This is the part in the class where you begin to act like you care.* An important rule in this class is to "love thy data as thyself." Consider the `flights` data from both the view of the airline executive and the customer. Given what you know about the data, write two questions that you would want to answer that would influence how you buy airline tickets.
+
+1) What is the average on time arrival rate of Delta Airlines?
+
+2)What is the average customer satisfaction rating for each airline? You would have to survey passangers after their flights. This could be done on the airlines mobile application. Each time a person finishes flying they could get a notification to fill out a satisfaction survey of their flight. Then when you add this column to the data you could group by carrier and compare satisfaction ratings across the differing airline companies. 
+
+
+
